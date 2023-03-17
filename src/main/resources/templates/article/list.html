@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="fragments/header :: header">
+    <title>Hello</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+
+</head>
+<body>
+<div align="center">
+    <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button onclick="location.href='/article/list'" class="nav-link active" id="pills-home-tab"
+                    data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab"
+                    aria-controls="pills-home" aria-selected="true">ALL
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button th:onclick="'location.href=\''+@{/article/list/{category}(category=QNA)}+'\';'" class="nav-link" id="pills-QNA-tab"
+                    data-bs-toggle="pill" data-bs-target="#pills-QNA" type="button" role="tab"
+                    aria-controls="pills-QNA" aria-selected="false">QNA
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button th:onclick="'location.href=\''+@{/article/list/{category}(category=DAILY)}+'\';'" class="nav-link" id="pills-DAILY-tab"
+                    data-bs-toggle="pill" data-bs-target="#pills-DAILY" type="button" role="tab"
+                    aria-controls="pills-DAILY" aria-selected="false">DAILY
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button th:onclick="'location.href=\''+@{/article/list/{category}(category=COLUMN)}+'\';'" class="nav-link" id="pills-COLUMN-tab"
+                    data-bs-toggle="pill" data-bs-target="#pills-COLUMN" type="button" role="tab"
+                    aria-controls="pills-COLUMN" aria-selected="false">COLUMN
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button th:onclick="'location.href=\''+@{/article/list/{category}(category=KNOWLEDGE)}+'\';'" class="nav-link" id="pills-KNOWLEDGE-tab"
+                    data-bs-toggle="pill" data-bs-target="#pills-KNOWLEDGE" type="button" role="tab"
+                    aria-controls="pills-KNOWLEDGE" aria-selected="false">KNOWLEDGE
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button th:onclick="'location.href=\''+@{/article/list/{category}(category=STUDY)}+'\';'" class="nav-link" id="pills-STUDY-tab"
+                    data-bs-toggle="pill" data-bs-target="#pills-STUDY" type="button" role="tab"
+                    aria-controls="pills-STUDY" aria-selected="false">STUDY
+            </button>
+        </li>
+    </ul>
+</div>
+<div class="tab-content" ALIGN="center" id="pills-tabContent" hidden>
+    <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">ALL</div>
+    <div class="tab-pane fade" id="pills-QNA" role="tabpanel" aria-labelledby="pills-QNA-tab">QNA</div>
+    <div class="tab-pane fade" id="pills-DAILY" role="tabpanel" aria-labelledby="pills-DAILY-tab">DAILY</div>
+    <div class="tab-pane fade" id="pills-COLUMN" role="tabpanel" aria-labelledby="pills-COLUMN-tab">COLUMN</div>
+    <div class="tab-pane fade" id="pills-KNOWLEDGE" role="tabpanel" aria-labelledby="pills-KNOWLEDGE-tab">KNOWLEDGE</div>
+    <div class="tab-pane fade" id="pills-STUDY" role="tabpanel" aria-labelledby="pills-STUDY-tab">STUDY</div>
+</div>
+<div>
+    <div class="p-5 mb-4 bg-light rounded-3">
+        <div class="container-fluid py-5">
+            <h1 class="display-5 fw-bold">Custom page</h1>
+            <p class="col-md-8 fs-4">게시판</p>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">No.</th>
+                    <th scope="col">subject</th>
+                    <th scope="col">view_count</th>
+                    <th scope="col">writer</th>
+                </tr>
+                </thead>
+                <tbody th:if="${!articles.isEmpty()}">
+                <tr th:each="article : ${articles}">
+                    <td th:text="${article.articleIdx}"></td>
+                    <td>
+<!--                        <a th:href="@{/article/view(articleIdx=${article.articleIdx})}">-->
+                        <a class="link" th:href="@{/article/view/{articleIdx}(articleIdx=${article.articleIdx})}">
+                            <span th:text="${article.subject}"></span>
+                        </a>
+                    </td>
+                    <td th:text="${article.viewCount}"></td>
+                    <td th:text="${article.writer}"></td>
+                    <td>
+                        <!--                    <a href="#" th:href="@{/article/{id}/edit (id=${article.id})}"-->
+                        <!--                       class="btn btn-primary" role="button">수정</a>-->
+                    </td>
+                </tr>
+                </tbody>
+                <tbody th:if="${articles.isEmpty()}">
+                    <tr><td><p> 등록된 게시글이 없습니다.</p></td></tr>
+                </tbody>
+            </table>
+            <div class="text-end">
+                <th:block th:if="${#strings.equals(Auth.toString(), 'true')}">
+                <button class="btn btn-primary justify-content-end" type="button" onclick="location.href='/article/write'">write</button>
+                </th:block>
+            </div>
+        </div>
+        <nav aria-label="Page navigation"
+             th:with="
+                pageNumber = ${articles.pageable.pageNumber},
+                pageSize = ${articles.pageable.pageSize},
+                totalPages = ${articles.totalPages},
+                startPage = ${T(java.lang.Math).floor(pageNumber / pageSize) * pageSize + 1},
+                tempEndPage = ${startPage + pageSize - 1},
+                endPage = (${tempEndPage > totalPages ? totalPages : tempEndPage})">
+            <ul class="pagination justify-content-center">
+                <li th:classappend="${pageNumber + 1 <= pageSize + 1} ? 'disabled'" class="page-item">
+                    <a class="page-link" th:href="@{/article/list(page=1)}">
+                        <span>&laquo;</span>
+                    </a>
+                </li>
+
+                <li th:classappend="${articles.first} ? 'disabled'" class="page-item">
+                    <a class="page-link"
+                       th:href="${articles.first} ? '#' : @{/article/list(page=${#numbers.formatDecimal(startPage - pageSize, 0, -1)})}"
+                       aria-label="Previous">
+                        <span aria-hidden="true">&lt;</span>
+                    </a>
+                </li>
+
+                <li th:each="page: ${#numbers.sequence(startPage, endPage)}"
+                    th:classappend="${page == pageNumber + 1} ? 'active'" class="page-item">
+                    <a th:text="${page}" class="page-link" th:href="@{/article/list(page=${page})}"></a>
+                </li>
+
+                <li th:classappend="${articles.last} ? 'disabled'" class="page-item">
+                    <a class="page-link"
+                       th:href="${articles.last} ? '#' : @{/article/list(page=${#numbers.formatDecimal(startPage + pageSize, 0, -1)})}"
+                       aria-label="Next">
+                        <span aria-hidden="true">&gt;</span>
+                        <span class="sr-only"></span>
+                    </a>
+                </li>
+
+                <li th:classappend=" ${T(java.lang.Math).floor(totalPages/10)*10 <= startPage} ? 'disabled'"
+                    class="page-item">
+                    <a class="page-link" th:href="@{/article/list(page=${totalPages})}">
+                        <span>&raquo;</span>
+                        <span class="sr-only"></span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+    </div>
+</div>
+
+<div th:replace="fragments/footer :: footer"/>
+</body>
+<!--<script src="/js/etc.js"></script>-->
+</html>

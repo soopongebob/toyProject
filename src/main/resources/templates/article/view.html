@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="fragments/header :: header">
+    <title>Hello</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+
+</head>
+<body>
+<main class="container">
+    <div class="row g-8">
+        <div class="col-md-12">
+            <h3 class="pb-4 mb-4 fst-italic border-bottom">
+                From the Firehose
+            </h3>
+            <article class="blog-post">
+                <h2 class="blog-post-title" th:text="${article.subject}"></h2>
+                <p class="blog-post-meta">
+                <div class="text-end">
+                    <span th:text="${article.createdDtm}"></span>
+                    by <span th:text="${article.writer}"></span>
+                </div>
+                </p>
+                <hr>
+                <p th:utext="${article.content}"></p>
+            </article>
+            <hr>
+            <nav class="blog-pagination" aria-label="Pagination">
+                <div class="text-end">
+                    <!--                    <span sec:authorize="isAuthenticated()" th:if="${auth == 'own'}">-->
+                    <!--                        <button type="button" class="btn btn-outline-primary" th:onclick="'location.href=\''+@{/article/edit(articleIdx=${article.articleIdx})}+'\';'">Edit</button>-->
+                    <!--                        <button type="button" class="btn btn-outline-dark" th:onclick="'location.href=\''+@{/article/delete(articleIdx=${article.articleIdx})}+'\';'">Delete</button>-->
+                    <th:block th:if="${#strings.equals(articleAuth.toString(), 'true')}">
+                        <button type="button" class="btn btn-outline-primary"
+                                th:onclick="'location.href=\''+@{/article/edit/{articleIdx}(articleIdx=${article.articleIdx})}+'\';'">
+                            Edit
+                        </button>
+                        <button type="button" id="deleteBtn" class="btn btn-outline-dark"
+                                th:onclick="'location.href=\''+@{/article/delete/{articleIdx}(articleIdx=${article.articleIdx})}+'\';'">
+                            Delete
+                        </button>
+                        <!--                    </span>-->
+                    </th:block>
+                    <button type="button" class="btn btn-outline-info"
+                            th:onclick="'location.href=\''+@{/article/list}+'\';'">list
+                    </button>
+                </div>
+            </nav>
+            <!-- comment -->
+            <!--            <div sec:authorize="isAuthenticated()">-->
+            <th:block th:if="${#strings.equals(Auth.toString(), 'true')}">
+                <div class="container">
+<!--                    <form th:action="@{/article/comment/{articleIdx}(articleIdx=${article.articleIdx})}"-->
+<!--                          th:object="${comment}" method="post">-->
+                        <div class="form-group">
+                            <input type="hidden" id="articleIdxNew" th:value="${article.articleIdx}" class="form-control">
+                            <input type="text" id="newComment" class="form-control"
+                                   placeholder="comment를 입력하세요">
+<!--                            <button type="submit" id="createBtn" class="btn btn-primary">Submit</button>-->
+                            <button type="button" id="createBtn" class="btn btn-primary">Submit</button>
+                        </div>
+                    <br/>
+                </div>
+            </th:block>
+            <!-- /container -->
+            <!--            <div sec:authorize="isAnonymous()">-->
+            <th:block th:if="${#strings.equals(Auth.toString(), 'false')}">
+                <div class="container">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="로그인 후 이용 가능합니다." disabled>
+                        <button type="submit" class="btn btn-primary" disabled>Submit</button>
+                    </div>
+                    <br/>
+                </div>
+            </th:block>
+            <!-- /container -->
+            <!--            </div>-->
+            <hr>
+            <div class="container">
+                <table>
+                    <tr th:each="comment : ${comments}">
+                        <td th:text="${comment.user.userName}" width="10%">
+                        </td>
+                        <td style="display: none;">
+                            <input type="text" id="commentIdx" th:value="${comment.commentIdx}" class="form-control"
+                                   style="display: none;">
+                            <input type="text" id="articleIdx" th:value="${article.articleIdx}" class="form-control"
+                                   style="display: none;">
+                        </td>
+                        <td width="90%">
+                            <input type="text" id="editComment" th:value="${comment.comment}" class="form-control"
+                                   style="display: none;">
+                            <span id="viewComment" th:text="${comment.comment}"></span>
+                        </td>
+                        <td>
+                            <th:block th:if="${commentAuth.toString()} == ${comment.user.userIdx}">
+                                <!--                                    <button type="button" id="editBtn" class="btn btn-outline-primary" th:onclick="changeBtn()">Edit</button>-->
+                                <button type="button" id="editBtn" class="btn btn-outline-primary">Edit</button>
+                                <button type="button" id="commitBtn" class="btn btn-outline-primary"
+                                        style="display: none;">Commit
+                                </button>
+                                <button type="button" id="commentDeleteBtn" class="btn btn-outline-dark">delete</button>
+                            </th:block>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <!-- end of comment -->
+        </div>
+    </div>
+
+</main>
+<div th:replace="fragments/footer :: footer"/>
+</body>
+<script src="/js/comment.js"></script>
+</html>
