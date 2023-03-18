@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="fragments/header :: header">
+    <title>Hello</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+
+<div class="p-5 mb-4 bg-light rounded-3">
+    <div class="container-fluid py-5">
+        <h1 class="display-5 fw-bold">Custom page</h1>
+        <p class="col-md-8 fs-4">게시판</p>
+        <div th:if="${!articles.isEmpty()}">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">No.</th>
+                    <th scope="col">subject</th>
+                    <th scope="col">view_count</th>
+                    <th scope="col">writer</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="article : ${articles}">
+                    <td th:text="${article.articleIdx}"></td>
+                    <td>
+                        <!--                        <a th:href="@{/article/view(articleIdx=${article.articleIdx})}">-->
+                        <a th:href="@{/article/view/{articleIdx}(articleIdx=${article.articleIdx})}">
+                            <span th:text="${article.subject}"></span>
+                        </a>
+                    </td>
+                    <td th:text="${article.viewCount}"></td>
+                    <td th:text="${article.writer}"></td>
+                    <td>
+                        <!--                    <a href="#" th:href="@{/article/{id}/edit (id=${article.id})}"-->
+                        <!--                       class="btn btn-primary" role="button">수정</a>-->
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="text-end">
+                <button class="btn btn-primary justify-content-end" type="button" onclick="location.href='/article/write'">
+                    write
+                </button>
+            </div>
+        </div>
+        <div th:if="${articles.isEmpty()}">
+            <h5>검색결과가 없습니다.</h5>
+        </div>
+    </div>
+    <nav aria-label="Page navigation"
+         th:with="
+                pageNumber = ${articles.pageable.pageNumber},
+                pageSize = ${articles.pageable.pageSize},
+                totalPages = ${articles.totalPages},
+                startPage = ${T(Math).floor(pageNumber / pageSize) * pageSize + 1},
+                tempEndPage = ${startPage + pageSize - 1},
+                endPage = (${tempEndPage > totalPages ? totalPages : tempEndPage})">
+        <ul class="pagination justify-content-center">
+            <li th:classappend="${pageNumber + 1 <= pageSize + 1} ? 'disabled'" class="page-item">
+                <a class="page-link" th:href="@{/article/list(page=1)}">
+                    <span>&laquo;</span>
+                </a>
+            </li>
+
+            <li th:classappend="${articles.first} ? 'disabled'" class="page-item">
+                <a class="page-link"
+                   th:href="${articles.first} ? '#' : @{/article/list(page=${#numbers.formatDecimal(startPage - pageSize, 0, -1)})}"
+                   aria-label="Previous">
+                    <span aria-hidden="true">&lt;</span>
+                </a>
+            </li>
+
+            <li th:each="page: ${#numbers.sequence(startPage, (endPage == 0 ? startPage : endPage))}"
+                th:classappend="${page == pageNumber + 1} ? 'active'" class="page-item">
+                <a th:text="${page}" class="page-link" th:href="@{/article/list(page=${page})}"></a>
+            </li>
+
+            <li th:classappend="${articles.last} ? 'disabled'" class="page-item">
+                <a class="page-link"
+                   th:href="${articles.last} ? '#' : @{/article/list(page=${#numbers.formatDecimal(startPage + pageSize, 0, -1)})}"
+                   aria-label="Next">
+                    <span aria-hidden="true">&gt;</span>
+                    <span class="sr-only"></span>
+                </a>
+            </li>
+
+            <li th:classappend=" ${T(Math).floor(totalPages/10)*10 <= startPage} ? 'disabled'"
+                class="page-item">
+                <a class="page-link" th:href="@{/article/list(page=${totalPages})}">
+                    <span>&raquo;</span>
+                    <span class="sr-only"></span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<div th:replace="fragments/footer :: footer"/>
+</body>
+</html>
